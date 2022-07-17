@@ -45,10 +45,13 @@
 
     <script>
         const pageLoading = document.querySelector('.page__loading')
+
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
+
         fetchData()
         function fetchData() {
             pageLoading.style.display = 'flex'
-            fetch('http://localhost:5000/api/v1/blogs-user').then(res => res.json()).then(({data,...res}) => {
+            fetch(`${domain}/api/v1/blogs-user`).then(res => res.json()).then(({data,...res}) => {
                 pageLoading.style.display = 'none'
                 if(data.length < 1) {
                     document.querySelector('tbody').innerHTML += `
@@ -124,7 +127,7 @@
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     pageLoading.style.display = 'flex'
-                                    fetch(`http://localhost:5000/api/v1/blogs/${btn.dataset.id}`, {
+                                    fetch(`${domain}/api/v1/blogs/${btn.dataset.id}`, {
                                         method: 'PUT',
                                         headers: {
                                             'Content-Type': 'application/json'
@@ -166,7 +169,7 @@
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     pageLoading.style.display = 'flex'
-                                    fetch(`http://localhost:5000/api/v1/blogs/${btn.dataset.id}/${btn.dataset.imageid}`, {
+                                    fetch(`${domain}/api/v1/blogs/${btn.dataset.id}/${btn.dataset.imageid}`, {
                                         method: 'DELETE',
                                         headers: {
                                             'Content-Type': 'application/json'

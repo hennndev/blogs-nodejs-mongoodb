@@ -73,9 +73,11 @@
 
         fetching()
 
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
+
         function fetching() {
             pageLoading.style.display = 'flex'
-            fetch('http://localhost:5000/api/v1/blogs').then(res => res.json()).then(res => {
+            fetch(`${domain}/api/v1/blogs`).then(res => res.json()).then(res => {
                 const blogsData = res.data
                 pageLoading.style.display = 'none'
                 blogsData.forEach(blog => blogs.push(blog))

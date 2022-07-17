@@ -66,6 +66,8 @@
         const formError = document.querySelector('.form__error')
         const formSuccess = document.querySelector('.form__success')
 
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
+
         formSignup.addEventListener('submit', async (e) => {
             e.preventDefault()
 
@@ -86,7 +88,7 @@
                         password: password.value
                     }
                     pageLoading.style.display = 'flex'
-                    const res = await fetch('http://localhost:5000/users/signup', {
+                    const res = await fetch(`${domain}/users/signup`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

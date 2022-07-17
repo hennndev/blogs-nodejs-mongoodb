@@ -21,9 +21,9 @@
     <script>
 
         const blogId = location.pathname.split('/')[2]
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
 
-        fetch(`http://localhost:5000/api/v1/blogs/${blogId}`).then(res => res.json()).then(({data, ...res}) => {
-            console.log(data)
+        fetch(`${domain}/api/v1/blogs/${blogId}`).then(res => res.json()).then(({data, ...res}) => {
             document.querySelector('.blog__details__container').innerHTML = `
                 <div class="blog__details">
                     <div class="blog__details__image">

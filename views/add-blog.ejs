@@ -65,6 +65,8 @@
         const blogImage = document.getElementById('blogImage')
         const pageLoading = document.querySelector('.page__loading')
 
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
+
         blogImage.addEventListener('change', (e) => handlePreviewImage(e.target.files[0]))
 
         function handlePreviewImage(image) {
@@ -117,7 +119,7 @@
                                 method: 'POST',
                                 body: formDataImage
                             }).then(res => res.json()).then(image => {
-                                fetch('http://localhost:5000/api/v1/blogs', {
+                                fetch(`${domain}/api/v1/blogs`, {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
