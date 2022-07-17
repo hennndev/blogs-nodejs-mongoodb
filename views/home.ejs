@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="home.css">
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page">
+            <div class="page__loading flex__center">
+                <div class="page__loading__box">
+                    Loading.....
+                </div>
+            </div>
+            <div class="blog__categories__container flexx">
+                <div class="blog__category active" data-id="all">All Category</div>
+                <div class="blog__category" data-id="programming">Programming</div>
+                <div class="blog__category" data-id="traveller">Traveller</div>
+                <div class="blog__category" data-id="graphic_design">Graphic Design</div>
+                <div class="blog__category" data-id="ui/ux">UI/UX</div>
+                <div class="blog__category" data-id="digital_marketing">Digital Marketing</div>
+            </div>
+
+            <div class="blogs__container"> 
+            </div>
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+
+    <script>
+
+        const blogsContainer = document.querySelector('.blogs__container')
+        const blogsCategory = document.querySelectorAll('.blog__category')
+        const pageLoading = document.querySelector('.page__loading')
+
+        let blogs = []
+        let ctys = []
+
+        function handleCtys(act, id) {
+            if(act === 'remove') {
+                for(let i = 0; i < ctys.length; i++){ 
+                    if (ctys[i] === id) { 
+                        ctys.splice(i, 1); 
+                    }
+                }
+            } else {
+                ctys.push(id)
+            }
+        }  
+
+        blogsCategory.forEach(blogCty => {
+            if(blogCty.classList.contains('active')) {
+                handleCtys('add', blogCty.dataset.id)
+            }
+            blogCty.addEventListener('click', (e) => {
+                if(blogCty.classList.contains('active')) {
+                    blogCty.classList.remove('active')
+                    handleCtys('remove', blogCty.dataset.id)
+                    displayBlogs(ctys)
+                } else {
+                    blogCty.classList.add('active')
+                    handleCtys('add', blogCty.dataset.id)
+                    displayBlogs(ctys)
+                }
+            })
+        })
+
+        fetching()
+
+        function fetching() {
+            pageLoading.style.display = 'flex'
+            fetch('http://localhost:5000/api/v1/blogs').then(res => res.json()).then(res => {
+                const blogsData = res.data
+                pageLoading.style.display = 'none'
+                blogsData.forEach(blog => blogs.push(blog))
+                displayBlogs(['all'])
+            }).catch((err) => pageLoading.style.display = 'none')
+        }
+
+        function displayBlogs(cty) {
+            const updatedBlogs = blogs.filter(blog => {
+                if(cty.includes('all')) {
+                    return blog
+                } else {
+                    return cty.includes(blog.blogCategory)
+                }
+            })
+            let dataTemp = ``
+
+            if(blogs.length < 1) {
+                blogsContainer.classList.remove('blogs__container')
+                blogsContainer.classList.add('blogs__empty')
+                    dataTemp = '<p>Sorry, Blogs not available</p>'
+            } else if(updatedBlogs.length < 1) {
+                blogsContainer.classList.remove('blogs__container')
+                blogsContainer.classList.add('blogs__empty')
+                dataTemp = '<p>Blogs category what you want is not available</p>'
+            } else {
+                blogsContainer.classList.add('blogs__container')
+                blogsContainer.classList.remove('blogs__empty')
+                updatedBlogs.forEach(blog => {
+                    dataTemp += `
+                        <div class="blog" data-id="${blog._id}">
+                            <div class="blog__image">
+                                <img src="${blog.blogImage.blogImageURL}" alt="${blog.blogTitle}"">
+                            </div>
+                            <div class="blog__detail">
+                                <div>
+                                    <div class="blog__detail__top flex__between">
+                                        <p>${blog.blogCategory.charAt(0).toUpperCase() + blog.blogCategory.slice(1).replace('_', ' ')} | <span>${new Date(blog.createdAt).toLocaleDateString()}</span></p>
+                                    </div>
+                                    <div class="blog__detail__content">
+                                        <h2>${blog.blogTitle.length > 35 ? `${blog.blogTitle.slice(0, 35)}...` : blog.blogTitle}</h2>
+                                        <p>${blog.blogDescription.length > 150 ? 
+                                            `${blog.blogDescription.slice(0, 150)}...<a href="/blogs/${blog._id}">Read More</a>` : 
+                                            blog.blogDescription}</p>
+                                    </div>
+                                </div>
+                                <div class="blog__detail__bottom flex__between">
+                                    <p>${blog.blogAuthor.username}</p>
+                                    <a href="/blogs/${blog._id}">See Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                })
+            }
+            blogsContainer.innerHTML = dataTemp
+            document.querySelectorAll('.blog').forEach((blog) => {
+                blog.addEventListener('click', () => {
+                    location.href = `/blogs/${blog.dataset.id}`
+                })
+            })
+        }
+        
+
+    </script>
+</body>
+</html>

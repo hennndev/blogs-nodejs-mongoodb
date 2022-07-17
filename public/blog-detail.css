@@ -1,0 +1,32 @@
+.blog__details__container {
+    margin-top: 30px;
+}
+.blog__details {
+    width: 800px;
+}
+.blog__details__image {
+    height: 400px;
+}
+.blog__details__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.blog__details__content {
+    padding: 10px;
+}
+.blog__details__content__top {
+    color: gray;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+.blog__details__content__description h1 {
+    color: #222;
+    font-size: 35px;
+}
+.blog__details__content__description p {
+    line-height: 1.5;
+    color: #444;
+    margin-top: 10px;
+}

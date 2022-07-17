@@ -1,0 +1,71 @@
+.table__container {
+    overflow-x: auto;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.table .table__head {
+    background-color: #1B2430;
+    color: #fff;
+}
+.table th {
+    padding: 15px 8px;
+    /* text-align: center; */
+}
+.table td {
+    padding: 12px 8px;
+    text-align: center;
+    white-space: nowrap;
+}
+.table .td__title {
+    line-height: 1.4;
+}
+
+.td__group .btn:not(:first-child) {
+    margin-left: 8px;
+}
+
+.modal__overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0,0,0,0.4);
+    display: none;
+    padding: 0 15px;
+}
+.modal__box {
+    width: 500px;
+    height: 500px;
+    background: #fff;
+    border-radius: 4px;
+    padding: 15px;
+    overflow-y: scroll;
+    margin: 0 15px;
+}
+.modal__box h3 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+.modal__box .modal__desc {
+    margin-bottom: 15px;
+}
+.blog__desc {
+    margin-bottom: 15px;
+}
+.blog__desc span {
+    color: #444;
+    line-height: 1.4;
+    font-size: 15px;
+}
+.blogImg img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}

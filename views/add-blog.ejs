@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../style.css">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page flex__center">
+            <div class="page__loading flex__center">
+                <div class="page__loading__box">
+                    <p>Loading.....</p>
+                </div>
+            </div>
+            <form class="form form__add" id="formAdd">
+                <h2>Add Blog Form</h2>
+                <div class="input__control">
+                    <label for="blogTitle">Blog Title</label>
+                    <input type="text" id="blogTitle" placeholder="Type blog title here...">
+                    <small class="input__error" id="blogTitle__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="blogCategory">Blog Category</label>
+                    <select type="text" id="blogCategory">
+                        <option value="">Select blog category</option>
+                        <option value="programming">Programming</option>
+                        <option value="graphic_design">Graphic Design</option>
+                        <option value="traveller">Traveller</option>
+                        <option value="ui/ux">UI/UX</option>
+                        <option value="digital_marketing">Digital Marketing</option>
+                    </select>
+                    <small class="input__error" id="blogCategory__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="blogDescription">Blog Description</label>
+                    <textarea id="blogDescription" cols="30" rows="10" placeholder="Type blog description here..."></textarea>
+                    <small class="input__error" id="blogDescription__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="blogImage">Blog Image</label>
+                    <input type="file" id="blogImage" accept="image/*">
+                    <small class="input__error" id="blogImage__error"></small>
+                    <div class="preview__image"></div>
+                </div>
+                <div class="btn__group flex__center">
+                    <button class="btn" type="submit">Add Blog</button>
+                    <button class="btn btn__danger btnClear" type="button">Clear Form</button>
+                </div>
+            </form>
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+
+    <script>
+        const formAdd = document.getElementById('formAdd')
+        const blogTitle = document.getElementById('blogTitle')
+        const blogCategory = document.getElementById('blogCategory')
+        const blogDescription = document.getElementById('blogDescription')
+        const blogImage = document.getElementById('blogImage')
+        const pageLoading = document.querySelector('.page__loading')
+
+        blogImage.addEventListener('change', (e) => handlePreviewImage(e.target.files[0]))
+
+        function handlePreviewImage(image) {
+            const readerImg = new FileReader()
+            readerImg.readAsDataURL(image)
+            readerImg.onloadend = () => {
+                document.querySelector('.preview__image').innerHTML = `
+                    <img src="${readerImg.result}" alt="preview-image"/>
+                `
+            }
+        }
+
+
+        formAdd.addEventListener('submit', async (e) => {
+            e.preventDefault()  
+            if(blogTitle.value === '' || blogCategory.value === '' || blogDescription.value === '' || blogImage.files[0] === undefined) {
+                const errors = handleErrors({blogTitle, blogCategory, blogDescription, blogImage})
+                Object.keys(errors).forEach(error => {
+                    document.getElementById(`${error}__error`).innerHTML = errors[error]
+                })
+            } else {
+                Swal.fire({
+                    title: 'Are you sure want to add new blog?',
+                    text: "New blog will be added!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#',
+                    cancelButtonColor: 'cancel',
+                    confirmButtonText: 'Yes, add new blog!'
+                }).then(async(result) => {
+                    if(result.isConfirmed) {
+                        const errors = handleErrors({blogTitle, blogCategory, blogDescription, blogImage})
+                        Object.keys(errors).forEach(error => {
+                            document.getElementById(`${error}__error`).innerHTML = ''
+                        })
+        
+                        const values = {
+                            blogTitle: blogTitle.value,
+                            blogCategory: blogCategory.value,
+                            blogDescription: blogDescription.value,
+                        }
+        
+                        const formDataImage = new FormData()
+                        formDataImage.append('file', blogImage.files[0])
+                        formDataImage.append('upload_preset', 'qzxb5iq7')
+                        
+                        pageLoading.style.display = 'flex'
+                        try {
+                            const res = await fetch('https://api.cloudinary.com/v1_1/hennnpermanadev/image/upload', {
+                                method: 'POST',
+                                body: formDataImage
+                            }).then(res => res.json()).then(image => {
+                                fetch('http://localhost:5000/api/v1/blogs', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        ...values,
+                                        blogImage: {
+                                            blogImageURL: image.url,
+                                            blogImageID: image.public_id
+                                        }
+                                    })
+                                }).then(res => res.json()).then(() => {
+                                    Swal.fire(
+                                        'Added!',
+                                        'new blog has been added.',
+                                        'success'
+                                    ).then(() => {
+                                        pageLoading.style.display = 'none'
+                                        resetForm()
+                                    })
+                                }).catch(err => {
+                                    pageLoading.style.display = 'none'
+                                })
+                            })      
+                        } catch(error) {
+                            pageLoading.style.display = 'none'
+                            Swal.fire(
+                                'Error!',
+                                'Something error, please try again.',
+                                'error'
+                            )
+                        }
+                    }
+                })
+
+            }
+        })
+
+        function resetForm() {
+            const inputs = handleErrors({blogTitle, blogCategory, blogDescription, blogImage})
+            Object.keys(inputs).forEach(input => {
+                document.getElementById(`${input}`).value = ''
+                document.getElementById(`${input}__error`).innerHTML = ''
+            })
+            document.querySelector('.preview__image').innerHTML = ''
+        }
+
+        document.querySelector('.btnClear').addEventListener('click', () => resetForm())
+
+        function handleErrors(values) {
+            let errors = {
+                blogTitle: '',
+                blogCategory: '',
+                blogDescription: '',
+                blogImage: ''
+            }
+            if(values.blogTitle.value === '') {
+                errors.blogTitle = 'Please fill the blog title input!'
+            }
+            if(values.blogCategory.value === '') {
+                errors.blogCategory = 'Please fill the blog category input!'
+            } 
+            if(values.blogDescription.value === '') {
+                errors.blogDescription = 'Please fill the blog description input!'
+            }
+            if(values.blogImage.files[0] === undefined) {
+                errors.blogImage = 'Please fill the blog image input!'
+            }
+            return errors
+        }
+    </script>
+</body>
+</html>

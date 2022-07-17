@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../dashboard.css">
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page dashboard__container">
+            <div class="modal__overlay flex__center">
+                <div class="modal__box">   
+                </div>
+            </div>
+            <div class="page__loading flex__center">
+                <div class="page__loading__box">
+                    <p>Loading.....</p>
+                </div>
+            </div>
+            <div class="table__container">
+                <table class="table">
+                    <thead>
+                        <tr class="table__head">
+                            <th>No</th>
+                            <th>Id</th>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Info</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>  
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+
+    <script>
+        const pageLoading = document.querySelector('.page__loading')
+        fetchData()
+        function fetchData() {
+            pageLoading.style.display = 'flex'
+            fetch('http://localhost:5000/api/v1/blogs-user').then(res => res.json()).then(({data,...res}) => {
+                pageLoading.style.display = 'none'
+                if(data.length < 1) {
+                    document.querySelector('tbody').innerHTML += `
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    `
+                } else {
+                    data.forEach((data, idx) => {
+                        document.querySelector('tbody').innerHTML += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${data._id}</td>
+                                <td class="td__title">${data.blogTitle.length > 44 ? `${data.blogTitle.slice(0, 44)}...` : data.blogTitle}</td>
+                                <td>${data.blogCategory.replace('_', ' ')}</td>
+                                <td>
+                                    <a href="" data-id="${data._id}" class="blog__info">Blog Info</a>
+                                </td>
+                                <td>
+                                    <div class="td__group">
+                                        <button class="btn ${data.isShow && 'btn__success'} btnShow" data-id="${data._id}" data-show="${data.isShow}">${!data.isShow ? 'Hidden' : 'Show'}</button>
+                                        <button class="btn btn__primary btnEdit" data-id="${data._id}">Edit</button>
+                                        <button class="btn btn__danger btnDel" data-id="${data._id}" data-imageid="${data.blogImage.blogImageID}">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `
+                    })
+
+                    document.querySelectorAll('.blog__info').forEach(ele => {
+                        ele.addEventListener('click', (e) => {
+                            e.preventDefault()
+                            const blog = data.find(blog => blog._id === ele.dataset.id)
+                            document.querySelector('.modal__overlay').style.display = 'flex'
+                            document.querySelector('.modal__box').innerHTML = `
+                                <h3>Blog Info</h3>
+                                <div class="blog__desc blogTitle">
+                                    Blog Title: <br/> <span>${blog.blogTitle}</span>
+                                </div>
+                                <div class="blog__desc blogCty">
+                                    Blog Category: <br/> <span>${blog.blogCategory.replace('_', ' ')}</span>    
+                                </div>
+                                <div class="blog__desc blogDesc">
+                                    Blog Description : <br/> <span>${blog.blogDescription}</span>    
+                                </div>
+                                <div class="blog__desc blogImg">
+                                    <img src="${blog.blogImage.blogImageURL}" alt="${blog.blogTitle}"/>
+                                </div>
+                            `
+                        })
+                    })
+
+                    document.querySelector('.modal__overlay').addEventListener('click', () => {
+                        document.querySelector('.modal__overlay').style.display = 'none'
+                    })
+                    
+    
+                    document.querySelectorAll('.btnShow').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            Swal.fire({
+                                title: `Are you sure want to ${btn.dataset.show === 'true' ? 'hidden' : 'show'} this blog?`,
+                                text: `This blog will ${btn.dataset.show === 'true' ? 'hidden' : 'showed'} in homepage!`,
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: 'cancel',
+                                confirmButtonText: `Yes, ${btn.dataset.show === 'true' ? 'hidden' : 'showed'} it!`
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    pageLoading.style.display = 'flex'
+                                    fetch(`http://localhost:5000/api/v1/blogs/${btn.dataset.id}`, {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({
+                                            isShow: btn.dataset.show === 'true'
+                                        })
+                                    }).then(res => res.json()).then((res) => {
+                                        pageLoading.style.display = 'none'
+                                        Swal.fire(
+                                            `${btn.dataset.show === 'true' ? 'Hidden' : 'Showed'}!`,
+                                            `This blog was ${btn.dataset.show === 'true' ? 'hidden' : 'showed'} in homepage.`,
+                                            'success'
+                                        ).then(() => {
+                                            location.reload()
+                                        })
+                                    }).catch(() => pageLoading.style.display = 'none')
+                                }
+                            })
+                        })
+                    })
+    
+                    document.querySelectorAll('.btnEdit').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            location.href = `/blogs/edit-blog/${btn.dataset.id}`
+                        })
+                    })
+    
+                    document.querySelectorAll('.btnDel').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            Swal.fire({
+                                title: 'Are you sure want to delete this blog?',
+                                text: "This blog will deleted permanently!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: 'gray',
+                                confirmButtonText: 'Yes, delete it!'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    pageLoading.style.display = 'flex'
+                                    fetch(`http://localhost:5000/api/v1/blogs/${btn.dataset.id}/${btn.dataset.imageid}`, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        }
+                                    }).then(res => res.json()).then(() => {
+                                        pageLoading.style.display = 'none'
+                                        Swal.fire(
+                                            'Deleted!',
+                                            'Your blog has been deleted.',
+                                            'success'
+                                        ).then(() => location.reload())
+                                    }).catch((err) => {
+                                        pageLoading.style.display = 'none'
+                                    })
+                                }
+                            })
+                        })
+                    })
+                }
+            })
+        }
+
+    </script>
+</body>
+</html>

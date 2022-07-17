@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../blog-detail.css">
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page blog__details__container flex__center">
+            
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+
+    <script>
+
+        const blogId = location.pathname.split('/')[2]
+
+        fetch(`http://localhost:5000/api/v1/blogs/${blogId}`).then(res => res.json()).then(({data, ...res}) => {
+            console.log(data)
+            document.querySelector('.blog__details__container').innerHTML = `
+                <div class="blog__details">
+                    <div class="blog__details__image">
+                        <img src="${data.blogImage.blogImageURL}" alt="${data.blogTitle}">
+                    </div>
+                    <div class="blog__details__content">
+                        <div class="blog__details__content__top flex__between">
+                            <p>${data.blogCategory.replace('_', ' ')} | <span>${new Date(data.createdAt).toLocaleDateString()}</span></p>
+                            <p>Hendra</p>
+                        </div>
+                        <div class="blog__details__content__description">
+                            <h1>${data.blogTitle}</h1>
+                            <p>${data.blogDescription}</p>
+                        </div>
+                        <div class="page__back btn">Kembali</div>
+                    </div>
+                </div>
+            `
+
+            document.querySelector('.page__back').addEventListener('click', () => {
+                location.replace('/')
+            })
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+.profile__container {
+    margin-top: 30px;
+}
+.profile {
+    width: 800px;
+}
+.profile__header {
+    flex-direction: column;
+}
+.profile__header__image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.profile__header__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.profile__header h3 {
+    color: #444;
+    font-size: 17px;
+    margin-bottom: 10px;
+}
+
+
+
+
+/* PROFILE BODY */
+.profile__body {
+
+}
+.profile__blogs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+.profile__blog {
+    height: 300px;
+}
+.profile__blog__image {
+    height: 150px;
+}
+.profile__blog__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}

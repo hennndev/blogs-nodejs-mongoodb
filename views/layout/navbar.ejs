@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<body>
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <header class="header flex__between">
+        <h2>Node Blogs</h2>
+        <ul class="navigations flexx">
+            <li><a href="/">Home</a></li>
+            <li class="isAuth"><a href="/dashboard">Dashboard</a></li>
+            <li class="isAuth"><a href="/blogs/add-blog">Add Blog</a></li>
+            <li class="auth"><a href="/users/signin">Signin</a></li>
+        </ul>
+        <i class="fa-solid fa-bars menu__bar"></i>
+        <!-- <i class="fa-solid fa-xmark"></i> -->
+    </header>
+
+
+    <script>
+        const token = document.cookie.split('=')[1]
+        const elementAuth = document.querySelector('.auth a')
+        const menuBar = document.querySelector('.menu__bar')
+        const navigations = document.querySelector('.navigations')
+
+        if(token) {
+            elementAuth.innerHTML = 'Logout'
+            elementAuth.setAttribute('href', '')
+            elementAuth.addEventListener('click', (e) => {
+                e.preventDefault()
+                fetch('http://localhost:5000/users/signout')
+                    .then(res => {
+                        location.reload()
+                    })
+            })
+            document.querySelectorAll('.isAuth').forEach(ele => ele.style.display = 'inline') 
+        } else {
+            elementAuth.innerHTML = 'Signin'
+            elementAuth.setAttribute('href', '/users/signin')
+            document.querySelectorAll('.isAuth').forEach(ele => ele.style.display = 'none') 
+        }
+
+        menuBar.addEventListener('click', (e) => {
+            if(navigations.classList.contains('active')) {
+                navigations.classList.remove('active')
+            } else {
+                navigations.classList.add('active')
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../auth.css">
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page flex__center">
+            <div class="page__loading flex__center">
+                <div class="page__loading__box">
+                    <p>Loading.....</p>
+                </div>
+            </div>
+            <form class="form form__auth" id="formSignin">
+                <h2>Signin Form</h2>
+                <div class="form__alert form__error">
+                    <p></p>
+                </div>
+                <div class="input__control">
+                    <label for="">Email</label>
+                    <input type="email" id="email" placeholder="Type your email here...">
+                    <small class="input__error" id="email__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="password">Password</label>
+                    <input type="password" id="password">
+                    <small class="input__error" id="password__error"></small>
+                </div>
+                <div class="btn__group flex__center">
+                    <button class="btn" type="submit">Signin Now</button>
+                    <button class="btn btn__danger btnClear" type="button">Clear Form</button>
+                </div>
+                <div class="form__bottom">
+                    <p>Don't have an account ? <a href="/users/signup">Signup</a></p>
+                </div>
+            </form>
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+    <script>
+
+        const formSignin = document.getElementById('formSignin')
+        const email = document.getElementById('email')
+        const password = document.getElementById('password')
+        const formError = document.querySelector('.form__error')
+        const pageLoading = document.querySelector('.page__loading')
+
+        formSignin.addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            if(email.value === '' || password.value === '' || password.value.length < 8) {
+                const errors = handleError({email, password})
+                Object.keys(errors).forEach(err => {
+                    document.getElementById(`${err}__error`).innerHTML = errors[err]
+                })
+            } else {
+                const errors = handleError({email, password})
+                Object.keys(errors).forEach(err => {
+                    document.getElementById(`${err}__error`).innerHTML = ''
+                })
+                pageLoading.style.display = 'flex'
+                try {
+                    const res = await fetch('http://localhost:5000/users/signin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email.value,
+                            password: password.value
+                        })
+                    })
+                    const data = await res.json()
+                    if(data.message) {
+                        pageLoading.style.display = 'none'
+                        location.assign('/')
+                    } else {
+                        throw Error(data.error)
+                    }
+                } catch (error) {
+                    pageLoading.style.display = 'none'
+                    formError.style.display = 'block'
+                    document.querySelector('.form__error p').innerHTML = error.message
+                }
+            }
+
+        })
+
+        document.querySelector('.btnClear').addEventListener('click', () => {
+            email.value = ''
+            password.value = ''
+            formError.style.display = 'none'
+            const errors = handleError({email, password})
+            Object.keys(errors).forEach(err => {
+                document.getElementById(`${err}__error`).innerHTML = ''
+            })
+        })
+
+
+        function handleError(values) {
+            let errors = {
+                email: '',
+                password: ''
+            }
+            if(values.email.value === '') {
+                errors.email = 'Please fill the email input'
+            }
+            if(values.password.value === '') {
+                errors.password = 'Please fill the password input'
+            } 
+            if(values.password.value && values.password.value.length < 8) {
+                errors.password = 'Minimum password 8 character or more'
+            }
+            return errors
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../auth.css">
+</head>
+<body>
+    <main class="container">
+        <%- include('./layout/navbar') %>
+        <section class="page flex__center">
+            <div class="page__loading flex__center">
+                <div class="page__loading__box">
+                    <p>Loading.....</p>
+                </div>
+            </div>
+            <form class="form form__auth" id="formSignup">
+                <h2>Signup Form</h2>
+                <div class="form__alert form__error"><p></p></div>
+                <div class="form__alert form__success">
+                    <p>Success create new account. <a href="/users/signin">Signin now</a></p>
+                </div>
+                <div class="input__control">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Type your username here...">
+                    <small class="input__error" id="username__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="Type your email here...">
+                    <small class="input__error" id="email__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="password">Password</label>
+                    <input type="password" id="password">
+                    <small class="input__error" id="password__error"></small>
+                </div>
+                <div class="input__control">
+                    <label for="passwordConfirmation">Password Confirmation</label>
+                    <input type="password" id="passwordConfirmation">
+                    <small class="input__error" id="passwordConfirmation__error"></small>
+                </div>
+                <div class="btn__group flex__center">
+                    <button class="btn" type="submit">Signup Now</button>
+                    <button class="btn btn__danger btnClear" type="button">Clear Form</button>
+                </div>
+                <div class="form__bottom">
+                    <p>Already have an account ? <a href="/users/signin">Signin</a></p>
+                </div>
+            </form>
+        </section>
+        <%- include('./layout/footer') %>
+    </main>
+
+    <script>
+
+        const formSignup = document.getElementById('formSignup')
+        const username = document.getElementById('username')
+        const email = document.getElementById('email')
+        const password = document.getElementById('password')
+        const passwordConfirmation = document.getElementById('passwordConfirmation')
+        const pageLoading = document.querySelector('.page__loading')
+        const formError = document.querySelector('.form__error')
+        const formSuccess = document.querySelector('.form__success')
+
+        formSignup.addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            if(email.value === '' || password.value === '' || password.value.length < 8 || passwordConfirmation.value === '' || passwordConfirmation.value !== password.value) {
+                const errors = showError({username, email, password, passwordConfirmation})
+                Object.keys(errors).forEach(err => {
+                    document.getElementById(`${err}__error`).innerHTML = errors[err]
+                })
+            } else {
+                const errors = showError({username, email, password, passwordConfirmation})
+                Object.keys(errors).forEach(err => {
+                    document.getElementById(`${err}__error`).innerHTML = ''
+                })
+                try {
+                    const values = {
+                        username: username.value,
+                        email: email.value,
+                        password: password.value
+                    }
+                    pageLoading.style.display = 'flex'
+                    const res = await fetch('http://localhost:5000/users/signup', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(values)
+                    })
+                    const data = await res.json()
+                    if(data.message) {
+                        pageLoading.style.display = 'none'
+                        formSuccess.style.display = 'block'
+                        formError.style.display = 'none'
+                        resetForm()
+                    } else {
+                        throw Error(data.error)
+                    }
+                } catch (error) {
+                    pageLoading.style.display = 'none'
+                    formError.style.display = 'block'
+                    document.querySelector('.form__error p').innerHTML = error.message
+                    formSuccess.style.display = 'none'
+                }
+            }
+        })
+
+        function resetForm() {
+            username.value = ''
+            email.value = ''
+            password.value = ''
+            passwordConfirmation.value = ''
+        }
+
+        document.querySelector('.btnClear').addEventListener('click', () => {
+            resetForm()
+            formError.style.display = 'none'
+            formSuccess.style.display = 'none'
+            const errors = showError({username, email, password, passwordConfirmation})
+            Object.keys(errors).forEach(err => {
+                document.getElementById(`${err}__error`).innerHTML = ''
+            })
+        })
+
+
+        function showError(values) {
+            let errors = {
+                username: '',
+                email: '',
+                password: '',
+                passwordConfirmation: ''
+            }
+            if(values.username.value === '') {
+                errors.username = 'Please fill the username input'
+            }
+            if(values.email.value === '') {
+                errors.email = 'Please fill the email input'
+            }
+            if(values.password.value === '') {
+                errors.password = 'Please fill the password input'
+            } 
+            if(values.password.value && values.password.value.length < 8) {
+                errors.password = 'Minimum password 8 character or more'
+            }
+            if(values.passwordConfirmation.value !== values.password.value) {
+                errors.passwordConfirmation = 'Password confirmation not match'
+            }
+            if(values.passwordConfirmation.value === '') {
+                errors.passwordConfirmation = 'Please fill the password confirmation input'
+            }
+            return errors
+        }
+    </script>
+</body>
+</html>
