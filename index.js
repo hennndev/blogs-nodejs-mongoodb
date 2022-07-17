@@ -16,7 +16,6 @@ mongoose.connect(process.env.MONGOODB_URI, {
     app.listen( process.env.PORT || 5000, () => console.log('Connected to server'))
 }).catch(() => console.log('Failed connect to database'))
 
-
 app.set('view engine', 'ejs')
 app.use(express.static(__dirname + '/public'))
 app.use(express.json())
