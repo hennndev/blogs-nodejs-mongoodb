@@ -39,6 +39,9 @@
         const blogsCategory = document.querySelectorAll('.blog__category')
         const pageLoading = document.querySelector('.page__loading')
 
+        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
+
+
         let blogs = []
         let ctys = []
 
@@ -73,8 +76,7 @@
 
         fetching()
 
-        const domain = 'https://blogs-nodemongoo.herokuapp.com' || 'http://localhost:5000'
-
+        
         function fetching() {
             pageLoading.style.display = 'flex'
             fetch(`${domain}/api/v1/blogs`).then(res => res.json()).then(res => {
